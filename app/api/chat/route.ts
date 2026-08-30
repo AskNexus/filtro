@@ -1,7 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 
-const client = new Anthropic();
+const client = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
 
 const SYSTEM_PROMPT = `Eres Luna, asistente virtual de una acompañante profesional de lujo. Tu trabajo es atender a los hombres que contactan con amabilidad y profesionalismo, recopilar su información, y calificarlos como potenciales clientes.
 
@@ -47,14 +50,16 @@ export async function POST(req: NextRequest) {
         content: m.content,
       }));
 
-  const response = await client.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+  const response = await client.chat.completions.create({
+    model: 'anthropic/claude-haiku-4-5',
     max_tokens: 600,
-    system: SYSTEM_PROMPT,
-    messages: apiMessages,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...apiMessages,
+    ],
   });
 
-  const fullText = response.content[0].type === 'text' ? response.content[0].text : '';
+  const fullText = response.choices[0]?.message?.content ?? '';
 
   const leadDataMatch = fullText.match(/<lead_data>([\s\S]*?)<\/lead_data>/);
   let leadData = null;
@@ -64,7 +69,7 @@ export async function POST(req: NextRequest) {
     try {
       leadData = JSON.parse(leadDataMatch[1].trim());
     } catch {
-      // ignore parse errors silently
+      // ignore parse errors
     }
   }
 
