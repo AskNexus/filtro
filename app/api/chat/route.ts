@@ -1,10 +1,4 @@
-import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
-
-const client = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
 
 const SYSTEM_PROMPT = `Eres Luna, asistente virtual de una acompañante profesional de lujo. Tu trabajo es atender a los hombres que contactan con amabilidad y profesionalismo, recopilar su información, y calificarlos como potenciales clientes.
 
@@ -43,23 +37,42 @@ Criterios de score:
 export async function POST(req: NextRequest) {
   const { messages, init } = await req.json();
 
-  const apiMessages: { role: 'user' | 'assistant'; content: string }[] = init
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'Missing API key' }, { status: 500 });
+  }
+
+  const apiMessages: { role: string; content: string }[] = init
     ? [{ role: 'user', content: 'Inicia la conversación con tu saludo de bienvenida.' }]
     : messages.map((m: { role: string; content: string }) => ({
-        role: m.role as 'user' | 'assistant',
+        role: m.role,
         content: m.content,
       }));
 
-  const response = await client.chat.completions.create({
-    model: 'anthropic/claude-haiku-4-5',
-    max_tokens: 600,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...apiMessages,
-    ],
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'anthropic/claude-haiku-4-5',
+      max_tokens: 600,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...apiMessages,
+      ],
+    }),
   });
 
-  const fullText = response.choices[0]?.message?.content ?? '';
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('OpenRouter error:', res.status, err);
+    return NextResponse.json({ error: 'AI service error' }, { status: 500 });
+  }
+
+  const data = await res.json();
+  const fullText: string = data.choices?.[0]?.message?.content ?? '';
 
   const leadDataMatch = fullText.match(/<lead_data>([\s\S]*?)<\/lead_data>/);
   let leadData = null;
@@ -69,7 +82,7 @@ export async function POST(req: NextRequest) {
     try {
       leadData = JSON.parse(leadDataMatch[1].trim());
     } catch {
-      // ignore parse errors
+      // ignore
     }
   }
 
