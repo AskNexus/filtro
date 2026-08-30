@@ -55,28 +55,8 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [leadData, setLeadData] = useState<LeadData>(initialLeadData);
   const [isTyping, setIsTyping] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'dashboard'>('chat');
   const [dashCollapsed, setDashCollapsed] = useState(false);
-
-  const startConversation = useCallback(async () => {
-    setHasStarted(true);
-    setIsTyping(true);
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [], init: true }),
-      });
-      const data = await res.json();
-      setMessages([{ role: 'assistant', content: data.message, timestamp: new Date() }]);
-      if (data.leadData) setLeadData(data.leadData);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsTyping(false);
-    }
-  }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -111,10 +91,8 @@ export default function Home() {
   const resetConversation = useCallback(() => {
     setMessages([]);
     setLeadData(initialLeadData);
-    setHasStarted(false);
   }, []);
 
-  // When new lead data arrives on mobile, nudge user to dashboard tab
   const filledFields = [leadData.name, leadData.service, leadData.city, leadData.availability].filter(Boolean).length;
 
   return (
@@ -159,10 +137,7 @@ export default function Home() {
           <ChatIcon />
           Vista del cliente
           {activeTab === 'chat' && (
-            <span
-              className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t"
-              style={{ background: '#25D366' }}
-            />
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t" style={{ background: '#25D366' }} />
           )}
         </button>
         <button
@@ -181,10 +156,7 @@ export default function Home() {
             </span>
           )}
           {activeTab === 'dashboard' && (
-            <span
-              className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t"
-              style={{ background: '#25D366' }}
-            />
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t" style={{ background: '#25D366' }} />
           )}
         </button>
       </div>
@@ -197,7 +169,6 @@ export default function Home() {
           className={`flex-col min-w-0 border-r ${activeTab === 'chat' ? 'flex' : 'hidden'} md:flex md:flex-1`}
           style={{ borderColor: '#21262D' }}
         >
-          {/* Desktop label */}
           <div
             className="hidden md:flex flex-shrink-0 items-center gap-2 px-4 py-2 border-b"
             style={{ background: '#0D1117', borderColor: '#21262D', height: 36 }}
@@ -205,14 +176,11 @@ export default function Home() {
             <span style={{ color: '#8B949E' }}><ChatIcon /></span>
             <span className="text-xs" style={{ color: '#8B949E' }}>Vista del cliente — WhatsApp</span>
           </div>
-
           <div className="flex-1 min-h-0">
             <ChatPanel
               messages={messages}
               isTyping={isTyping}
-              hasStarted={hasStarted}
               onSend={sendMessage}
-              onStart={startConversation}
               onReset={resetConversation}
             />
           </div>
@@ -221,17 +189,12 @@ export default function Home() {
         {/* Dashboard panel */}
         <div
           className={`flex-col ${activeTab === 'dashboard' ? 'flex' : 'hidden'} md:flex flex-shrink-0 transition-all duration-300 overflow-hidden`}
-          style={{
-            width: dashCollapsed ? 44 : 390,
-            borderLeft: '1px solid #21262D',
-          }}
+          style={{ width: dashCollapsed ? 44 : 390, borderLeft: '1px solid #21262D' }}
         >
-          {/* Desktop label + collapse toggle */}
           <div
             className="hidden md:flex flex-shrink-0 items-center gap-2 px-3 py-2 border-b cursor-pointer select-none"
             style={{ background: '#0D1117', borderColor: '#21262D', height: 36 }}
             onClick={() => setDashCollapsed(v => !v)}
-            title={dashCollapsed ? 'Expandir panel' : 'Colapsar panel'}
           >
             <span style={{ color: '#8B949E', flexShrink: 0 }}>
               <CollapseIcon flipped={dashCollapsed} />
@@ -245,11 +208,9 @@ export default function Home() {
               </>
             )}
           </div>
-
-          {/* Dashboard content */}
           {!dashCollapsed && (
             <div className="flex-1 min-h-0 overflow-auto" style={{ width: 390 }}>
-              <DashboardPanel leadData={leadData} hasStarted={hasStarted} />
+              <DashboardPanel leadData={leadData} hasStarted={messages.length > 0} />
             </div>
           )}
         </div>

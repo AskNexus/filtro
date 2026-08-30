@@ -6,9 +6,7 @@ import { Message } from '@/app/page';
 interface ChatPanelProps {
   messages: Message[];
   isTyping: boolean;
-  hasStarted: boolean;
   onSend: (content: string) => void;
-  onStart: () => void;
   onReset: () => void;
 }
 
@@ -57,9 +55,7 @@ const icons = {
 export default function ChatPanel({
   messages,
   isTyping,
-  hasStarted,
   onSend,
-  onStart,
   onReset,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
@@ -105,7 +101,7 @@ export default function ChatPanel({
           <div className="text-xs leading-tight" style={{ color: '#8696A0' }}>
             {isTyping ? (
               <span style={{ color: '#25D366' }}>escribiendo...</span>
-            ) : hasStarted ? (
+            ) : messages.length > 0 ? (
               'en línea'
             ) : (
               'asistente virtual'
@@ -121,14 +117,11 @@ export default function ChatPanel({
           <button className="transition-opacity hover:opacity-70" style={{ color: '#AEBAC1' }}>
             {icons.phone}
           </button>
-          {hasStarted ? (
+          {messages.length > 0 ? (
             <button
               onClick={onReset}
               className="text-xs px-2.5 py-1 rounded transition-colors"
-              style={{
-                color: '#8696A0',
-                border: '1px solid #3D5462',
-              }}
+              style={{ color: '#8696A0', border: '1px solid #3D5462' }}
             >
               Nueva demo
             </button>
@@ -145,36 +138,15 @@ export default function ChatPanel({
         className="flex-1 overflow-y-auto py-3 px-3 space-y-1"
         style={{ background: '#0B141A' }}
       >
-        {!hasStarted ? (
+        {messages.length === 0 && !isTyping ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center px-6 max-w-xs">
-              <div
-                className="mx-auto mb-5 rounded-full flex items-center justify-center"
-                style={{
-                  width: 72,
-                  height: 72,
-                  background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
-                }}
-              >
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="white">
-                  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
-                </svg>
-              </div>
-              <h2 className="font-semibold text-lg mb-1.5" style={{ color: '#E9EDEF' }}>
-                Simulador de conversación
-              </h2>
-              <p className="text-sm mb-6 leading-relaxed" style={{ color: '#8696A0' }}>
-                Escribe como si fueras el cliente. El bot responde y el panel derecho muestra cómo se califica el lead en tiempo real.
+              <p className="text-sm leading-relaxed" style={{ color: '#8696A0' }}>
+                Escribe como el cliente para empezar la conversación
               </p>
-              <button
-                onClick={onStart}
-                className="font-semibold px-8 py-3 rounded-full transition-colors text-sm text-white"
-                style={{ background: '#25D366' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#1ebe5a')}
-                onMouseLeave={e => (e.currentTarget.style.background = '#25D366')}
-              >
-                Iniciar conversación
-              </button>
+              <p className="text-xs mt-2" style={{ color: '#3D5462' }}>
+                Ejemplo: "Hola, ¿cómo estás? Estoy interesado en tus servicios"
+              </p>
             </div>
           </div>
         ) : (
@@ -250,8 +222,7 @@ export default function ChatPanel({
       </div>
 
       {/* Input area */}
-      {hasStarted && (
-        <div className="flex-shrink-0 px-3 py-2.5" style={{ background: '#202C33' }}>
+      <div className="flex-shrink-0 px-3 py-2.5" style={{ background: '#202C33' }}>
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <button
               type="button"
@@ -295,8 +266,7 @@ export default function ChatPanel({
               {input.trim() ? icons.send : icons.mic}
             </button>
           </form>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
