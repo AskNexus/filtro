@@ -8,6 +8,8 @@ interface ChatPanelProps {
   isTyping: boolean;
   onSend: (content: string) => void;
   onReset: () => void;
+  busyMode: boolean;
+  botName: string;
 }
 
 function formatTime(date: Date) {
@@ -57,6 +59,8 @@ export default function ChatPanel({
   isTyping,
   onSend,
   onReset,
+  busyMode,
+  botName,
 }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -96,15 +100,15 @@ export default function ChatPanel({
         {/* Name + status */}
         <div className="flex-1 min-w-0">
           <div className="text-[#E9EDEF] font-medium text-[15px] leading-tight truncate">
-            Luna
+            {botName}
           </div>
           <div className="text-xs leading-tight" style={{ color: '#8696A0' }}>
-            {isTyping ? (
+            {busyMode ? (
+              <span style={{ color: '#FFB347' }}>ocupada ahora</span>
+            ) : isTyping ? (
               <span style={{ color: '#25D366' }}>escribiendo...</span>
-            ) : messages.length > 0 ? (
-              'en línea'
             ) : (
-              'asistente virtual'
+              'en línea'
             )}
           </div>
         </div>
@@ -132,6 +136,19 @@ export default function ChatPanel({
           )}
         </div>
       </div>
+
+      {/* Busy mode banner */}
+      {busyMode && (
+        <div
+          className="flex-shrink-0 flex items-center justify-center gap-2 py-2 text-xs font-medium"
+          style={{ background: 'rgba(255,179,71,0.12)', color: '#FFB347', borderBottom: '1px solid rgba(255,179,71,0.2)' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" />
+          </svg>
+          Modo ocupada activo — respuesta automática
+        </div>
+      )}
 
       {/* Messages area */}
       <div
