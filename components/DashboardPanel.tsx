@@ -242,7 +242,7 @@ export default function DashboardPanel({
         )}
 
         {/* ── Stats grid ── */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <StatCard label="Chats hoy" value={stats.total} color="#E6EDF3" />
           <StatCard label="% Calientes" value={`${hotPct}%`} color="#25D366" />
           <StatCard label="Confirmadas" value={stats.confirmed} color="#53BDEB" />

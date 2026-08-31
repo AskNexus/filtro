@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import ChatPanel from '@/components/ChatPanel';
 import DashboardPanel from '@/components/DashboardPanel';
 import ConfigPanel from '@/components/ConfigPanel';
@@ -93,6 +93,14 @@ export default function Home() {
   const [showConfig, setShowConfig] = useState(false);
 
   const hasStarted = messages.length > 0;
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Compute live stats
   const stats = {
@@ -270,8 +278,8 @@ export default function Home() {
 
         {/* Dashboard panel */}
         <div
-          className={`flex-col ${activeTab === 'dashboard' ? 'flex' : 'hidden'} md:flex flex-shrink-0 transition-all duration-300 overflow-hidden`}
-          style={{ width: dashCollapsed ? 44 : 390, borderLeft: '1px solid #21262D' }}
+          className={`flex-col ${activeTab === 'dashboard' ? 'flex flex-1 md:flex-none' : 'hidden'} md:flex md:flex-shrink-0 transition-all duration-300 overflow-hidden`}
+          style={{ width: isMobile ? '100%' : (dashCollapsed ? 44 : 390), borderLeft: isMobile ? 'none' : '1px solid #21262D' }}
         >
           <div
             className="hidden md:flex flex-shrink-0 items-center gap-2 px-3 py-2 border-b cursor-pointer select-none"
@@ -291,7 +299,7 @@ export default function Home() {
             )}
           </div>
           {!dashCollapsed && (
-            <div className="flex-1 min-h-0 overflow-auto" style={{ width: 390 }}>
+            <div className="flex-1 min-h-0 overflow-auto w-full">
               <DashboardPanel
                 leadData={leadData}
                 hasStarted={hasStarted}
