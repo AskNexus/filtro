@@ -13,8 +13,8 @@ const SAMPLE_LEADS = [
   { name: 'Roberto M.', service: 'Tarde completa', city: 'Madrid', score: 'warm' as const, time: 'Ayer' },
 ];
 
-const STAGES = ['Saludo', 'Servicio', 'Ciudad', 'Hora', 'Cierre'];
-const stageOrder = ['greeting', 'service', 'city', 'availability', 'closing', 'done'];
+const STAGES = ['Saludo', 'Presentación', 'Disponibilidad', 'Confirmar', 'Cerrada'];
+const stageOrder = ['greeting', 'presentation', 'availability', 'needs_confirmation', 'confirmed', 'done'];
 
 const scoreConfig = {
   cold: { label: 'Frío', color: '#FF6B6B', bg: 'rgba(255,107,107,0.12)', border: 'rgba(255,107,107,0.25)', dot: '#FF6B6B' },
