@@ -138,6 +138,10 @@ export default function Home() {
           }),
         });
         const data = await res.json();
+        // Natural typing delay: 1.5–3s depending on response length
+        const len = (data.message ?? '').length;
+        const delay = Math.min(1500 + len * 18, 3200);
+        await new Promise(r => setTimeout(r, delay));
         setMessages(prev => [
           ...prev,
           { role: 'assistant', content: data.message, timestamp: new Date() },
